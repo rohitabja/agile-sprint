@@ -1,4 +1,4 @@
-package com.agilesprint;
+package com.agilesprint.config;
 
 import java.util.Collection;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import reactor.core.publisher.Mono;
@@ -25,7 +26,8 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableReactiveMethodSecurity
-public class SecurityConfig {
+@Profile("local")
+public class LocalSecurityConfig {
 
     @Bean
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,

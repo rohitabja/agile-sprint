@@ -1,4 +1,4 @@
-package com.agilesprint;
+package com.agilesprint.controllers;
 
 import java.util.Map;
 
