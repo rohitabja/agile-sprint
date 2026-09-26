@@ -16,38 +16,80 @@ public final class ApiMapper {
     }
 
     public static ApiDtos.WorkspaceResponse workspace(Workspace workspace, long memberCount) {
-        return new ApiDtos.WorkspaceResponse(workspace.getId(), workspace.getName(), workspace.getDescription(),
-                workspace.getOwnerUsername(), workspace.getCreatedAt(), memberCount);
+        return ApiDtos.WorkspaceResponse.builder()
+                .id(workspace.getId())
+                .name(workspace.getName())
+                .description(workspace.getDescription())
+                .ownerUsername(workspace.getOwnerUsername())
+                .createdAt(workspace.getCreatedAt())
+                .memberCount(memberCount)
+                .build();
     }
 
     public static ApiDtos.MemberResponse member(WorkspaceMember member) {
-        return new ApiDtos.MemberResponse(member.getId(), member.getUserId(), member.getUsername(),
-                member.getEmail(), member.getRole());
+        return ApiDtos.MemberResponse.builder()
+                .id(member.getId())
+                .userId(member.getUserId())
+                .username(member.getUsername())
+                .email(member.getEmail())
+                .role(member.getRole())
+                .build();
     }
 
     public static ApiDtos.ColumnResponse column(BoardColumn column) {
-        return new ApiDtos.ColumnResponse(column.getId(), column.getName(), column.getKey(), column.getPosition());
+        return ApiDtos.ColumnResponse.builder()
+                .id(column.getId())
+                .name(column.getName())
+                .key(column.getKey())
+                .position(column.getPosition())
+                .build();
     }
 
     public static ApiDtos.BoardResponse board(Board board, List<BoardColumn> columns) {
-        return new ApiDtos.BoardResponse(board.getId(), board.getWorkspaceId(), board.getName(),
-                columns.stream().map(ApiMapper::column).toList());
+        return ApiDtos.BoardResponse.builder()
+                .id(board.getId())
+                .workspaceId(board.getWorkspaceId())
+                .name(board.getName())
+                .columns(columns.stream().map(ApiMapper::column).toList())
+                .build();
     }
 
     public static ApiDtos.TaskResponse task(Task task) {
-        return new ApiDtos.TaskResponse(task.getId(), task.getBoardId(), task.getWorkspaceId(), task.getColumnId(),
-                task.getTitle(), task.getDescription(), task.getPriority(), task.getAssigneeId(),
-                task.getAssigneeUsername(), task.getCreatedByUsername(), task.getPosition(), task.getCreatedAt(),
-                task.getUpdatedAt());
+        return ApiDtos.TaskResponse.builder()
+                .id(task.getId())
+                .boardId(task.getBoardId())
+                .workspaceId(task.getWorkspaceId())
+                .columnId(task.getColumnId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .priority(task.getPriority())
+                .assigneeId(task.getAssigneeId())
+                .assigneeUsername(task.getAssigneeUsername())
+                .createdByUsername(task.getCreatedByUsername())
+                .position(task.getPosition())
+                .createdAt(task.getCreatedAt())
+                .updatedAt(task.getUpdatedAt())
+                .build();
     }
 
     public static ApiDtos.CommentResponse comment(TaskComment comment) {
-        return new ApiDtos.CommentResponse(comment.getId(), comment.getTaskId(), comment.getAuthorName(),
-                comment.getBody(), comment.getCreatedAt());
+        return ApiDtos.CommentResponse.builder()
+                .id(comment.getId())
+                .taskId(comment.getTaskId())
+                .authorName(comment.getAuthorName())
+                .body(comment.getBody())
+                .createdAt(comment.getCreatedAt())
+                .build();
     }
 
     public static ApiDtos.ActivityResponse activity(Activity activity) {
-        return new ApiDtos.ActivityResponse(activity.getId(), activity.getTaskId(), activity.getActorName(),
-                activity.getType(), activity.getMessage(), activity.getCreatedAt());
+        return ApiDtos.ActivityResponse.builder()
+                .id(activity.getId())
+                .taskId(activity.getTaskId())
+                .actorName(activity.getActorName())
+                .type(activity.getType())
+                .message(activity.getMessage())
+                .createdAt(activity.getCreatedAt())
+                .build();
     }
 }
