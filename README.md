@@ -52,17 +52,21 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` and sign in with the imported Keycloak user:
+Open `http://localhost:5173` and sign in with one of the users imported into
+the `demo` realm:
 
 ```text
-Username: demo
-Password: demo
+Demo user:   demo  / demo
+Realm admin: admin / Admin@123
+Other users: user1, user2, user3, or user4 / User@123
 ```
 
-Keycloak admin is at `http://localhost:8081` (`admin` / `admin`). The backend
-uses a session cookie for browser login and also accepts Keycloak bearer JWTs
-for API clients. Vite proxies `/api`, `/oauth2`, `/login`, and `/logout` to the
-backend; the backend CORS policy accepts localhost development ports.
+The Keycloak administration console is at `http://localhost:8081`. Its
+bootstrap administrator credentials are `admin` / `admin`; these are separate
+from the `admin` user in the `demo` realm. The backend uses a session cookie for
+browser login and also accepts Keycloak bearer JWTs for API clients. Vite
+proxies `/api`, `/oauth2`, `/login`, and `/logout` to the backend; the backend
+CORS policy accepts localhost development ports.
 
 ## API overview
 
