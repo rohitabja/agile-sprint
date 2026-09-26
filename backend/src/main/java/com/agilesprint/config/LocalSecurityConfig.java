@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import reactor.core.publisher.Mono;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -71,7 +72,7 @@ public class LocalSecurityConfig {
                 return List.of();
             }
             return roles.stream()
-                    .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role))
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                     .collect(Collectors.toList());
         });
         return new ReactiveJwtAuthenticationConverterAdapter(converter);
