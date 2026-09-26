@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    com.agilesprint: INFO
+    org.springframework.security: INFO
+
+spring:
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/agilesprint}
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: ${KEYCLOAK_CLIENT_ID:demo-client}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:demo-secret}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          keycloak:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/demo}
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/demo}
+          jwk-set-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/demo}/protocol/openid-connect/certs
