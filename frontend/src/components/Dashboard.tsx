@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -17,28 +18,22 @@ import {
   Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import { api, ApiError } from '../api/client'
+import { ApiError } from '../api/client'
 import { useToast } from '../contexts/ToastContext'
-import type { User, Workspace } from '../types'
+import { useCreateWorkspace, useWorkspaces } from '../hooks/useWorkspaces'
+import type { User } from '../types'
 
 export function Dashboard({ user }: { user: User }) {
   const toast = useToast()
   const navigate = useNavigate()
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({ name: '', description: '' })
 
-  useEffect(() => {
-    api
-      .workspaces()
-      .then(setWorkspaces)
-      .catch((error) => toast(error.message))
-  }, [])
-
+  const workspacesQuery = useWorkspaces()
+  const createWorkspaceMutation = useCreateWorkspace()
   const create = async () => {
     try {
-      const workspace = await api.createWorkspace(form)
-      setWorkspaces((current) => [...current, workspace])
+      const workspace = await createWorkspaceMutation.mutateAsync(form)
       setOpen(false)
       setForm({ name: '', description: '' })
       navigate(`/workspaces/${workspace.id}`)
@@ -50,6 +45,17 @@ export function Dashboard({ user }: { user: User }) {
       )
     }
   }
+  useEffect(() => {
+    if (workspacesQuery.error) {
+      toast(
+        workspacesQuery.error instanceof ApiError
+          ? workspacesQuery.error.message
+          : 'Could not load workspaces',
+      )
+    }
+  }, [toast, workspacesQuery.error])
+
+  const workspaces = workspacesQuery.data ?? []
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
@@ -76,7 +82,11 @@ export function Dashboard({ user }: { user: User }) {
           New workspace
         </Button>
       </Stack>
-      {workspaces.length === 0 ? (
+      {workspacesQuery.isPending ? (
+        <Box className="center">
+          <CircularProgress />
+        </Box>
+      ) : workspaces.length === 0 ? (
         <Paper className="empty-state">
           <Typography variant="h6">Your first sprint starts here</Typography>
           <Typography color="text.secondary" mb={2}>
@@ -145,7 +155,7 @@ export function Dashboard({ user }: { user: User }) {
           <Button
             variant="contained"
             onClick={create}
-            disabled={!form.name.trim()}
+            disabled={!form.name.trim() || createWorkspaceMutation.isPending}
           >
             Create
           </Button>

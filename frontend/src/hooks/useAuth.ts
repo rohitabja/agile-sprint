@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { api } from '../api/client'
+import { queryKeys } from '../api/queryKeys'
 import type { User } from '../types'
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const query = useQuery({
+    queryKey: queryKeys.auth,
+    queryFn: async (): Promise<User | null> => {
+      const status = await api.auth()
+      return status.authenticated ? status.user : null
+    },
+    retry: false,
+  })
 
-  useEffect(() => {
-    api
-      .auth()
-      .then((status) => setUser(status.authenticated ? status.user : null))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false))
-  }, [])
-
-  return { user, loading }
+  return { user: query.data ?? null, loading: query.isPending }
 }

@@ -16,9 +16,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { api } from '../api/client'
 import { useToast } from '../contexts/ToastContext'
-import type { Board, Comment, Task } from '../types'
+import { useAddComment, useComments } from '../hooks/useComments'
+import type { Board, Task } from '../types'
 
 export function TaskCard({
   task,
@@ -31,25 +31,17 @@ export function TaskCard({
 }) {
   const toast = useToast()
   const [open, setOpen] = useState(false)
-  const [comments, setComments] = useState<Comment[]>([])
   const [body, setBody] = useState('')
-  const showComments = async () => {
-    try {
-      setComments(await api.comments(task.id))
-      setOpen(true)
-    } catch {
-      toast('Could not load comments')
-    }
-  }
-  const addComment = async () => {
+  const commentsQuery = useComments(task.id, open)
+  const addCommentMutation = useAddComment(task.id)
+  const comments = commentsQuery.data ?? []
+  const showComments = () => setOpen(true)
+  const addComment = () => {
     if (!body.trim()) return
-    try {
-      const comment = await api.addComment(task.id, body)
-      setComments((current) => [...current, comment])
-      setBody('')
-    } catch {
-      toast('Could not add comment')
-    }
+    addCommentMutation.mutate(body, {
+      onSuccess: () => setBody(''),
+      onError: () => toast('Could not add comment'),
+    })
   }
   return (
     <>
@@ -109,7 +101,15 @@ export function TaskCard({
       >
         <DialogTitle>{task.title}</DialogTitle>
         <DialogContent>
-          {comments.length === 0 ? (
+          {commentsQuery.isPending ? (
+            <Typography color="text.secondary" sx={{ py: 2 }}>
+              Loading comments...
+            </Typography>
+          ) : commentsQuery.error ? (
+            <Typography color="error" sx={{ py: 2 }}>
+              Could not load comments.
+            </Typography>
+          ) : comments.length === 0 ? (
             <Typography color="text.secondary" sx={{ py: 2 }}>
               No comments yet.
             </Typography>
@@ -138,7 +138,7 @@ export function TaskCard({
           <Button
             variant="contained"
             onClick={addComment}
-            disabled={!body.trim()}
+            disabled={!body.trim() || addCommentMutation.isPending}
           >
             Comment
           </Button>

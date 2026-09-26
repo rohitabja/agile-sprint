@@ -1,62 +1,66 @@
 import { useEffect, useMemo, useState } from 'react'
-import { api, ApiError } from '../api/client'
-import type { Activity, Board, Member, Task } from '../types'
+import { ApiError } from '../api/client'
+import { useActivity } from './useActivity'
+import { useBoards } from './useBoards'
+import { useCreateTask, useMoveTask, useTasks } from './useTasks'
+import { useInviteMember, useMembers } from './useMembers'
+import type { Board, Task } from '../types'
 
 export function useWorkspaceBoard(
   workspaceId: string,
   notify: (message: string) => void,
 ) {
-  const [boards, setBoards] = useState<Board[]>([])
-  const [board, setBoard] = useState<Board | null>(null)
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [members, setMembers] = useState<Member[]>([])
-  const [activity, setActivity] = useState<Activity[]>([])
-
-  const load = async () => {
-    try {
-      const [loadedBoards, loadedMembers, loadedActivity] = await Promise.all([
-        api.boards(workspaceId),
-        api.members(workspaceId),
-        api.activity(workspaceId),
-      ])
-      setBoards(loadedBoards)
-      setMembers(loadedMembers)
-      setActivity(loadedActivity)
-      const selected =
-        board && loadedBoards.some((item) => item.id === board.id)
-          ? board
-          : loadedBoards[0]
-      if (selected) {
-        setBoard(selected)
-        setTasks(await api.tasks(selected.id))
-      }
-    } catch (error) {
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null)
+  const boardsQuery = useBoards(workspaceId)
+  const membersQuery = useMembers(workspaceId)
+  const activityQuery = useActivity(workspaceId)
+  const boards = boardsQuery.data ?? []
+  const board =
+    boards.find((item) => item.id === selectedBoardId) ?? boards[0] ?? null
+  const boardId = board?.id ?? ''
+  const tasksQuery = useTasks(boardId)
+  const createTaskMutation = useCreateTask(workspaceId)
+  const moveTaskMutation = useMoveTask(workspaceId)
+  const inviteMutation = useInviteMember(workspaceId)
+  useEffect(() => {
+    if (boardsQuery.error) {
       notify(
-        error instanceof ApiError ? error.message : 'Could not load workspace',
+        boardsQuery.error instanceof ApiError
+          ? boardsQuery.error.message
+          : 'Could not load boards',
       )
     }
-  }
-
+  }, [boardsQuery.error, notify])
   useEffect(() => {
-    void load()
-  }, [workspaceId])
-
+    if (membersQuery.error) {
+      notify(
+        membersQuery.error instanceof ApiError
+          ? membersQuery.error.message
+          : 'Could not load workspace members',
+      )
+    }
+  }, [membersQuery.error, notify])
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      void api
-        .activity(workspaceId)
-        .then(setActivity)
-        .catch((error) =>
-          notify(
-            error instanceof ApiError
-              ? error.message
-              : 'Could not refresh activity',
-          ),
-        )
-    }, 5000)
-    return () => window.clearInterval(timer)
-  }, [workspaceId, notify])
-
+    if (activityQuery.error) {
+      notify(
+        activityQuery.error instanceof ApiError
+          ? activityQuery.error.message
+          : 'Could not refresh activity',
+      )
+    }
+  }, [activityQuery.error, notify])
+  useEffect(() => {
+    if (tasksQuery.error) {
+      notify(
+        tasksQuery.error instanceof ApiError
+          ? tasksQuery.error.message
+          : 'Could not load tasks',
+      )
+    }
+  }, [tasksQuery.error, notify])
+  const members = membersQuery.data ?? []
+  const activity = activityQuery.data ?? []
+  const tasks = tasksQuery.data ?? []
   const columns = board?.columns ?? []
   const grouped = useMemo(
     () =>
@@ -67,29 +71,28 @@ export function useWorkspaceBoard(
     [columns, tasks],
   )
 
-  const selectBoard = async (selected: Board) => {
-    setBoard(selected)
-    setTasks(await api.tasks(selected.id))
-  }
+  const selectBoard = (selected: Board) => setSelectedBoardId(selected.id)
 
   const createTask = async (form: {
     title: string
     description: string
     priority: Task['priority']
   }) => {
-    if (!board) return
-    const task = await api.createTask(board.id, {
-      ...form,
-      columnId: columns[0]?.id,
-    })
-    setTasks((current) => [...current, task])
+    if (board) {
+      await createTaskMutation.mutateAsync({
+        boardId: board.id,
+        columnId: columns[0]?.id,
+        form,
+      })
+    }
   }
 
   const moveTask = async (task: Task, columnId: string) => {
-    const updated = await api.moveTask(task.id, columnId)
-    setTasks((current) =>
-      current.map((item) => (item.id === updated.id ? updated : item)),
-    )
+    await moveTaskMutation.mutateAsync({ task, columnId })
+  }
+
+  const inviteMember = async (invite: { username: string; email: string }) => {
+    await inviteMutation.mutateAsync(invite)
   }
 
   return {
@@ -103,6 +106,7 @@ export function useWorkspaceBoard(
     selectBoard,
     createTask,
     moveTask,
-    setMembers,
+    inviteMember,
+    loading: boardsQuery.isPending,
   }
 }

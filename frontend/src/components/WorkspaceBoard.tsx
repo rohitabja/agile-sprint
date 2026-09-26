@@ -24,7 +24,7 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SendIcon from '@mui/icons-material/Send'
-import { ApiError, api } from '../api/client'
+import { ApiError } from '../api/client'
 import { useToast } from '../contexts/ToastContext'
 import { useWorkspaceBoard } from '../hooks/useWorkspaceBoard'
 import { TaskCard } from './TaskCard'
@@ -62,8 +62,7 @@ export function WorkspaceBoard({ user }: { user: User }) {
   }
   const sendInvite = async () => {
     try {
-      const member = await api.invite(workspaceId, invite)
-      state.setMembers((current) => [...current, member])
+      await state.inviteMember(invite)
       setInviteOpen(false)
       setInvite({ username: '', email: '' })
       toast('Invitation added')
@@ -73,10 +72,16 @@ export function WorkspaceBoard({ user }: { user: User }) {
       )
     }
   }
-  if (!state.board)
+  if (state.loading)
     return (
       <Box className="center">
         <CircularProgress />
+      </Box>
+    )
+  if (!state.board)
+    return (
+      <Box className="center">
+        <Typography color="text.secondary">No boards are available.</Typography>
       </Box>
     )
   const isAdmin = state.members.some(
