@@ -2,10 +2,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { api } from '../api/client'
-import { ToastContext } from '../contexts/ToastContext'
-import type { Board, Comment, Task } from '../types'
-import { TaskCard } from './TaskCard'
+import { api } from '../../api/client'
+import { ToastContext } from '../../contexts/ToastContext'
+import type { Board, Comment, Task } from '../../types'
+import { TaskCard } from '../TaskCard'
 
 const task: Task = {
   id: 'task-1',

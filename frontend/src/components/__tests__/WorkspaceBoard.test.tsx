@@ -7,15 +7,15 @@ import {
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ToastContext } from '../contexts/ToastContext'
-import { useWorkspaceBoard } from '../hooks/useWorkspaceBoard'
-import type { Activity, Board, Member, Task, User } from '../types'
-import { WorkspaceBoard } from './WorkspaceBoard'
+import { ToastContext } from '../../contexts/ToastContext'
+import { useWorkspaceBoard } from '../../hooks/useWorkspaceBoard'
+import type { Activity, Board, Member, Task, User } from '../../types'
+import { WorkspaceBoard } from '../WorkspaceBoard'
 
-vi.mock('../hooks/useWorkspaceBoard', () => ({
+vi.mock('../../hooks/useWorkspaceBoard', () => ({
   useWorkspaceBoard: vi.fn(),
 }))
-vi.mock('./TaskCard', () => ({
+vi.mock('../TaskCard', () => ({
   TaskCard: ({ task }: { task: Task }) => <div>{task.title}</div>,
 }))
 

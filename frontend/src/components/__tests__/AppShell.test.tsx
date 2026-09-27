@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
-import type { User } from '../types'
-import { AppShell } from './AppShell'
+import type { User } from '../../types'
+import { AppShell } from '../AppShell'
 
-vi.mock('./Dashboard', () => ({
+vi.mock('../Dashboard', () => ({
   Dashboard: () => <div>Dashboard route</div>,
 }))
-vi.mock('./WorkspaceBoard', () => ({
+vi.mock('../WorkspaceBoard', () => ({
   WorkspaceBoard: () => <div>Workspace route</div>,
 }))
 
