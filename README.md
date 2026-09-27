@@ -33,8 +33,12 @@ Start MongoDB and Keycloak:
 
 ```powershell
 cd <path-to-agile-sprint>
-docker compose up -d
+docker compose up -d --wait
 ```
+
+The command waits until Keycloak has finished importing the `demo` realm and
+its OIDC discovery endpoint is ready before returning. Start the backend only
+after this command completes.
 
 Start the reactive API:
 
